@@ -4,7 +4,7 @@ app.use(express.urlencoded({ extended: true }))
 app.set('view engine', 'ejs')
 const MongoClient = require('mongodb').MongoClient;
 
-var db
+let db
 MongoClient.connect('mongodb+srv://wihyanghoon:front95@cluster0.pnevfsg.mongodb.net/?retryWrites=true&w=majority', function (err, client) {
     // 오류시
     if (err) return console.log(err)
@@ -34,13 +34,41 @@ app.get('/write', function (req, res) {
 
 app.post('/add', function (req, res) {
     res.send('글작성 완료.')
-    console.log(req.body.title)
+    db.collection('counter').findOne({ name: '게시물갯수' }, function (err, result) {
+        console.log(result.totalPost)
 
-    db.collection('post').insertOne({ 제목 : req.body.title, 내용 : req.body.date }, function (err, result) {
-        console.log('저장완료')
+        let totalPost = result.totalPost
+
+        db.collection('post').insertOne({ _id: totalPost + 1, 제목: req.body.title, 내용: req.body.date }, function (err, result) {
+            console.log('저장완료')
+            db.collection('counter').updateOne({ name: '게시물갯수' }, { $inc: { totalPost: 1 } }, function (err, result) {
+                if (err) return console.log(err)
+            })
+        })
     })
 })
 
 app.get('/list', function (req, res) {
-    res.render('list.ejs')
+    // db에 저장된 post라는 collection안의 모든 데이터를 꺼내주세요.
+    db.collection('post').find().toArray(function (err, result) {
+        console.log(result)
+        res.render('list.ejs', { posts: result })
+    });
+})
+
+// /detail 로 접속하면 detail.ejs 보여줌
+// : <= 쿼리문자
+app.get('/detail/:id', function (req, res) {
+    db.collection('post').findOne({ _id: parseInt(req.params.id) }, function (error, result) {
+        console.log(result)
+        res.render('detail.ejs', { data: result })
+    })
+})
+
+app.delete('/delete', function (req, res) {
+    req.body._id = parseInt(req.body._id)
+    db.collection('post').deleteOne(req.body, function (err, result) {
+        console.log('삭제완료')
+        res.status(200).send({ message: '성공했습니다.' });
+    })
 })

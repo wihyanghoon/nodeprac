@@ -87,14 +87,9 @@ app.get('/edit/:id', function (req, res) {
 })
 
 app.put('/edit', function (req, res) {
-    // db.collection('counter12ㅇㄹㅇㄹㅇㄹㅇ').updateOne({ _id: parseInt(req.body.id) }, { $set: { 제목: req.body.title, 내용: req.body.date } }, function (err, result) {
-    //     if (result.ismaster.ok <= 0) {
-    //         return res.status(400).send({ message: '실패' })
-    //     }
-    //     console.log(result)
-    //     res.status(200).send({ message: '성공했습니다.' })
-    // })
-    db.collection('fdfd').find()
+    db.collection('post').updateOne({ _id: parseInt(req.body.id) }, { $set: { 제목: req.body.title, 내용: req.body.date } }, function (err, result) {
+        res.redirect('/list')
+    })
 })
 
 app.delete('/delete', function (req, res) {
@@ -105,6 +100,48 @@ app.delete('/delete', function (req, res) {
     })
 })
 
-app.get('/test', function (req, res) {
-    db.collection('df').find()
+const passport = require('passport')
+const LocalStrategy = require('passport-local').Strategy
+const session = require('express-session')
+
+
+
+app.use(session({ secret: '비밀코드', resave: true, saveUninitialized: false }))
+app.use(passport.initialize())
+app.use(passport.session())
+
+app.get('/login', function (req, res) {
+    res.render('login.ejs')
 })
+
+app.post('/login', passport.authenticate('local', { failureRedirect: '/fail' }), function (req, res) {
+    res.redirect('/')
+})
+
+passport.use(new LocalStrategy({
+    usernameField: 'id',
+    passwordField: 'pw',
+    session: true,
+    passReqToCallback: false,
+}, function (입력한아이디, 입력한비번, done) {
+    //console.log(입력한아이디, 입력한비번);
+    db.collection('login').findOne({ id: 입력한아이디 }, function (에러, 결과) {
+        if (에러) return done(에러)
+
+        if (!결과) return done(null, false, { message: '존재하지않는 아이디요' })
+        if (입력한비번 == 결과.pw) {
+            return done(null, 결과)
+        } else {
+            return done(null, false, { message: '비번틀렸어요' })
+        }
+    })
+}));
+
+passport.serializeUser(function (user, done) {
+    done(null, user.id)
+});
+
+passport.deserializeUser(function (아이디, done) {
+    done(null, {})
+});
+

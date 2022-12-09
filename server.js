@@ -25,11 +25,11 @@ app.get('/beauty', function (req, res) {
 })
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/index.html')
+    res.render('index.ejs')
 })
 
 app.get('/write', function (req, res) {
-    res.sendFile(__dirname + '/write.html')
+    res.render('write.ejs')
 })
 
 app.post('/add', function (req, res) {
@@ -60,8 +60,14 @@ app.get('/list', function (req, res) {
 // : <= 쿼리문자
 app.get('/detail/:id', function (req, res) {
     db.collection('post').findOne({ _id: parseInt(req.params.id) }, function (error, result) {
-        console.log(result)
-        res.render('detail.ejs', { data: result })
+        if (!result) {
+            res.write("<script>alert('데이터가 없습니다.')</script>");
+            res.write("<script>window.location=\"/list\"</script>");
+        }
+        if (result) {
+            console.log(result)
+            res.render('detail.ejs', { data: result })
+        }
     })
 })
 

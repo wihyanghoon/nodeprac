@@ -14,35 +14,24 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Navbar</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <a class="nav-link active" href="/">Home <span class="sr-only">(current)</span></a>
-                <a class="nav-link" href="/write">write</a>
-            </div>
-        </div>
-    </nav>
-    <ul class="list-group">
+    <%- include('nav.html') %>
+    
+    <div class="container mt-5">
         <% for (var i=0; i < posts.length; i ++) { %>
-            <li class="list-group-item">
-                <p>
-                    <%= posts[i]._id %>
-                </p>
-                <h4>
-                    <%= posts[i].제목 %>
-                </h4>
-                <p>
-                    <%= posts[i].날짜 %>
-                </p>
-                <button id="delete" class="delete" data-id="<%= posts[i]._id %>">삭제</button>
-            </li>
-            <% } %>
-    </ul>
+            <div class="card" style="width: 100%;">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <%= posts[i].제목 %>
+                    </h5>
+                    <p class="card-text">
+                        <%= posts[i].내용 %>
+                    </p>
+                    <a href="#" class="btn btn-primary delete" data-id="<%= posts[i]._id %>">삭제</a>
+                    <a href="#" class="btn btn-primary detail" data-id="<%= posts[i]._id %>">상세보기</a>
+                </div>
+            </div>
+        <% } %>
+    </div>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 
     <script>
@@ -57,7 +46,11 @@
             })
         });
 
-        
+        $('.detail').click(function (e) {
+            window.location.href = `http://localhost:8080/detail/${e.target.dataset.id}`
+        })
+
+
     </script>
 
     <!-- Option 2: Separate Popper and Bootstrap JS -->
